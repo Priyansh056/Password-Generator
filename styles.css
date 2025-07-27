@@ -1,0 +1,155 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #121212;
+    color: #e0e0e0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.container {
+    background-color: #1e1e1e;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    width: 90%;
+    max-width: 400px;
+    /* Added for positioning the battery indicator */
+    position: relative; 
+}
+
+/* --- New Battery Styles --- */
+.battery-container {
+    position: absolute;
+    top: 1rem;
+    right: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.battery {
+    width: 30px;
+    height: 15px;
+    border: 2px solid #888;
+    border-radius: 4px;
+    padding: 2px;
+    position: relative;
+}
+
+/* Battery terminal */
+.battery::after {
+    content: '';
+    width: 3px;
+    height: 8px;
+    background-color: #888;
+    position: absolute;
+    right: -7px;
+    top: 50%;
+    transform: translateY(-50%);
+    border-radius: 0 2px 2px 0;
+}
+
+.battery-level {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.5s ease, background-color 0.5s ease;
+}
+
+/* Colors for battery level */
+.battery-level.high { background-color: #4CAF50; } /* Green */
+.battery-level.medium { background-color: #ffc107; } /* Yellow */
+.battery-level.low { background-color: #f44336; } /* Red */
+.battery-level.charging { background-color: #2196F3; } /* Blue for charging */
+
+#battery-percentage {
+    font-size: 0.9rem;
+    font-weight: bold;
+}
+/* --- End of Battery Styles --- */
+
+h1 {
+    text-align: center;
+    color: #4CAF50;
+    margin-bottom: 1.5rem;
+    margin-top: 2rem; /* Added margin to not overlap with battery */
+}
+
+.password-display-container {
+    display: flex;
+    margin-bottom: 1.5rem;
+}
+
+#passwordDisplay {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #333;
+    background-color: #2c2c2c;
+    color: #e0e0e0;
+    border-radius: 5px 0 0 5px;
+    font-size: 1.1rem;
+    outline: none;
+}
+
+#copyBtn {
+    padding: 0.75rem;
+    border: none;
+    background-color: #4CAF50;
+    color: white;
+    cursor: pointer;
+    border-radius: 0 5px 5px 0;
+    font-size: 1rem;
+}
+
+#copyBtn:hover {
+    background-color: #45a049;
+}
+
+.options {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.option {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.option label {
+    font-size: 1rem;
+}
+
+.option input[type="number"] {
+    width: 60px;
+    padding: 5px;
+    background-color: #2c2c2c;
+    color: #e0e0e0;
+    border: 1px solid #333;
+    border-radius: 5px;
+}
+
+.option input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+}
+
+.btn {
+    width: 100%;
+    padding: 1rem;
+    border: none;
+    background-color: #008CBA;
+    color: white;
+    font-size: 1.1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.btn:hover {
+    background-color: #007B9E;
+}
