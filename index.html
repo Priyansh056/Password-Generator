@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Modern Password Generator</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #4f46e5, #9333ea);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      color: #333;
+    }
+
+    .container {
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 30px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 480px;
+      animation: fadeIn 0.5s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 2em;
+      background: linear-gradient(to right, #4f46e5, #9333ea);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      font-weight: 600;
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    input[type="range"] {
+      width: 100%;
+    }
+
+    .length-display {
+      background: #4f46e5;
+      color: white;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-weight: bold;
+      margin-left: 10px;
+    }
+
+    .checkbox-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .checkbox-item {
+      flex: 1 1 45%;
+      display: flex;
+      align-items: center;
+    }
+
+    input[type="checkbox"] {
+      margin-right: 8px;
+      transform: scale(1.1);
+      accent-color: #4f46e5;
+    }
+
+    .generate-btn {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(to right, #4f46e5, #9333ea);
+      color: white;
+      font-weight: bold;
+      font-size: 1.1em;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.3s;
+    }
+
+    .generate-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .password-output {
+      background: #f3f4f6;
+      border: 2px solid #e5e7eb;
+      padding: 15px;
+      font-family: monospace;
+      font-size: 1.05em;
+      border-radius: 10px;
+      margin-top: 20px;
+      position: relative;
+      min-height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      word-break: break-word;
+    }
+
+    .copy-btn {
+      background: #4f46e5;
+      color: #fff;
+      border: none;
+      padding: 8px 10px;
+      border-radius: 6px;
+      font-size: 0.85em;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .copy-btn:hover {
+      background: #4338ca;
+    }
+
+    .strength-meter {
+      height: 8px;
+      background: #e5e7eb;
+      border-radius: 4px;
+      margin-top: 15px;
+      overflow: hidden;
+    }
+
+    .strength-fill {
+      height: 100%;
+      transition: width 0.3s ease;
+      border-radius: 4px;
+    }
+
+    .strength-text {
+      font-size: 0.9em;
+      margin-top: 8px;
+      font-weight: 600;
+    }
+
+    .placeholder-text {
+      color: #888;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔐 Password Generator</h1>
+
+    <div class="form-group">
+      <label for="length">Password Length:
+        <span class="length-display" id="lengthDisplay">12</span>
+      </label>
+      <input type="range" id="length" min="4" max="50" value="12" />
+    </div>
+
+    <div class="checkbox-group">
+      <div class="checkbox-item"><input type="checkbox" id="uppercase" checked /><label for="uppercase">Uppercase</label></div>
+      <div class="checkbox-item"><input type="checkbox" id="lowercase" checked /><label for="lowercase">Lowercase</label></div>
+      <div class="checkbox-item"><input type="checkbox" id="numbers" checked /><label for="numbers">Numbers</label></div>
+      <div class="checkbox-item"><input type="checkbox" id="symbols" checked /><label for="symbols">Symbols</label></div>
+    </div>
+
+    <button class="generate-btn" onclick="generatePassword()">Generate Password</button>
+
+    <div class="password-output" id="passwordOutput">
+      <span class="placeholder-text">Click "Generate" to create a password</span>
+      <button class="copy-btn" id="copyBtn" onclick="copyPassword()" style="display:none;">Copy</button>
+    </div>
+
+    <div class="strength-meter"><div class="strength-fill" id="strengthFill"></div></div>
+    <div class="strength-text" id="strengthText"></div>
+  </div>
+
+  <script>
+    let currentPassword = '';
+
+    document.getElementById('length').addEventListener('input', function () {
+      document.getElementById('lengthDisplay').textContent = this.value;
+    });
+
+    function generatePassword() {
+      const length = parseInt(document.getElementById('length').value);
+      const upper = document.getElementById('uppercase').checked;
+      const lower = document.getElementById('lowercase').checked;
+      const nums = document.getElementById('numbers').checked;
+      const symbs = document.getElementById('symbols').checked;
+
+      if (!upper && !lower && !nums && !symbs) {
+        alert('Select at least one character type.');
+        return;
+      }
+
+      const sets = {
+        upper: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+        lower: 'abcdefghijklmnopqrstuvwxyz',
+        nums: '0123456789',
+        symbs: '!@#$%^&*()_+[]{}|;:,.<>?'
+      };
+
+      let charset = '';
+      let guaranteed = '';
+
+      if (upper) { charset += sets.upper; guaranteed += randomChar(sets.upper); }
+      if (lower) { charset += sets.lower; guaranteed += randomChar(sets.lower); }
+      if (nums) { charset += sets.nums; guaranteed += randomChar(sets.nums); }
+      if (symbs) { charset += sets.symbs; guaranteed += randomChar(sets.symbs); }
+
+      let password = guaranteed;
+      for (let i = guaranteed.length; i < length; i++) {
+        password += randomChar(charset);
+      }
+
+      password = shuffle(password);
+      currentPassword = password;
+      displayPassword(password);
+      calculateStrength(password);
+    }
+
+    function randomChar(set) {
+      return set[Math.floor(Math.random() * set.length)];
+    }
+
+    function shuffle(str) {
+      return str.split('').sort(() => Math.random() - 0.5).join('');
+    }
+
+    function displayPassword(pass) {
+      const output = document.getElementById('passwordOutput');
+      const copyBtn = document.getElementById('copyBtn');
+      output.innerHTML = `<span>${pass}</span>`;
+      output.appendChild(copyBtn);
+      copyBtn.style.display = 'inline-block';
+    }
+
+    function copyPassword() {
+      if (!currentPassword) return;
+      navigator.clipboard.writeText(currentPassword).then(() => {
+        const btn = document.getElementById('copyBtn');
+        btn.textContent = 'Copied!';
+        setTimeout(() => btn.textContent = 'Copy', 2000);
+      });
+    }
+
+    function calculateStrength(pass) {
+      const fill = document.getElementById('strengthFill');
+      const text = document.getElementById('strengthText');
+      let score = 0;
+
+      if (pass.length >= 8) score++;
+      if (pass.length >= 12) score++;
+      if (/[a-z]/.test(pass)) score++;
+      if (/[A-Z]/.test(pass)) score++;
+      if (/[0-9]/.test(pass)) score++;
+      if (/[^A-Za-z0-9]/.test(pass)) score++;
+
+      let width = '25%', color = '#dc3545', label = 'Weak';
+      if (score >= 4) { width = '50%'; color = '#ffc107'; label = 'Fair'; }
+      if (score >= 5) { width = '75%'; color = '#28a745'; label = 'Good'; }
+      if (score >= 6) { width = '100%'; color = '#20c997'; label = 'Excellent'; }
+
+      fill.style.width = width;
+      fill.style.background = color;
+      text.textContent = `Strength: ${label}`;
+      text.style.color = color;
+    }
+
+    window.onload = generatePassword;
+  </script>
+</body>
+</html>
