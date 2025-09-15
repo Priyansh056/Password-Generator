@@ -3,7 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Modern Password Generator</title>
+  <title>Matrix Password Generator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
   <style>
     * {
       margin: 0;
@@ -12,163 +15,225 @@
     }
 
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, #4f46e5, #9333ea);
+      font-family: 'VT323', monospace;
+      background-color: #000;
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
       padding: 20px;
-      color: #333;
+      color: #0f0;
+      text-shadow: 0 0 5px #0f0;
+    }
+
+    #matrixCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
     }
 
     .container {
-      background: #ffffff;
-      border-radius: 16px;
+      background: rgba(0, 0, 0, 0.8);
+      border: 2px solid #0f0;
+      border-radius: 8px;
       padding: 30px;
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 0 25px rgba(0, 255, 0, 0.5);
       width: 100%;
-      max-width: 480px;
-      animation: fadeIn 0.5s ease;
+      max-width: 500px;
+      animation: fadeIn 1s ease;
     }
 
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
+      from { opacity: 0; transform: translateY(20px) scale(0.95); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
     }
 
     h1 {
       text-align: center;
-      font-size: 2em;
-      background: linear-gradient(to right, #4f46e5, #9333ea);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      margin-bottom: 20px;
+      font-size: 2.5em;
+      color: #0f0;
+      margin-bottom: 25px;
+      animation: flicker 1.5s infinite alternate;
+    }
+
+    @keyframes flicker {
+      0%, 18%, 22%, 25%, 53%, 57%, 100% {
+        text-shadow:
+        0 0 4px #fff, 0 0 11px #fff, 0 0 19px #fff,
+        0 0 40px #0fa, 0 0 80px #0fa, 0 0 90px #0fa,
+        0 0 100px #0fa, 0 0 150px #0fa;
+      }
+      20%, 24%, 55% { text-shadow: none; }
     }
 
     .form-group {
-      margin-bottom: 20px;
+      margin-bottom: 25px;
     }
 
     label {
-      font-weight: 600;
-      margin-bottom: 6px;
+      font-weight: normal;
+      font-size: 1.2em;
+      margin-bottom: 8px;
       display: block;
     }
 
     input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
       width: 100%;
+      height: 4px;
+      background: #0f0;
+      outline: none;
+      opacity: 0.7;
+      transition: opacity .2s;
+    }
+    input[type="range"]:hover { opacity: 1; }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none; appearance: none;
+      width: 20px; height: 20px;
+      background: #0f0; cursor: pointer;
+      box-shadow: 0 0 10px #0f0;
+    }
+    input[type="range"]::-moz-range-thumb {
+      width: 20px; height: 20px;
+      background: #0f0; cursor: pointer;
+      box-shadow: 0 0 10px #0f0;
     }
 
     .length-display {
-      background: #4f46e5;
-      color: white;
+      background: #0f0;
+      color: #000;
       padding: 4px 10px;
-      border-radius: 12px;
+      border-radius: 4px;
       font-weight: bold;
       margin-left: 10px;
+      text-shadow: none;
     }
 
     .checkbox-group {
-      display: flex;
-      flex-wrap: wrap;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
       gap: 15px;
-      margin-bottom: 20px;
+      margin-bottom: 25px;
     }
 
     .checkbox-item {
-      flex: 1 1 45%;
       display: flex;
       align-items: center;
     }
 
     input[type="checkbox"] {
-      margin-right: 8px;
-      transform: scale(1.1);
-      accent-color: #4f46e5;
+      -webkit-appearance: none;
+      appearance: none;
+      background-color: transparent;
+      border: 2px solid #0f0;
+      width: 18px;
+      height: 18px;
+      position: relative;
+      cursor: pointer;
+      margin-right: 10px;
+    }
+    input[type="checkbox"]:checked {
+      background-color: #0f0;
+      box-shadow: 0 0 10px #0f0;
+    }
+    input[type="checkbox"]:checked::before {
+      content: 'X';
+      font-size: 14px;
+      color: #000;
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      font-weight: bold;
+      text-shadow: none;
     }
 
     .generate-btn {
       width: 100%;
       padding: 12px;
-      background: linear-gradient(to right, #4f46e5, #9333ea);
-      color: white;
+      background: transparent;
+      color: #0f0;
       font-weight: bold;
-      font-size: 1.1em;
-      border: none;
-      border-radius: 8px;
+      font-size: 1.3em;
+      border: 2px solid #0f0;
+      border-radius: 4px;
       cursor: pointer;
-      transition: transform 0.2s ease, box-shadow 0.3s;
+      transition: background 0.3s, box-shadow 0.3s;
+      font-family: 'VT323', monospace;
     }
-
     .generate-btn:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+      background: #0f0;
+      color: #000;
+      text-shadow: none;
+      box-shadow: 0 0 20px #0f0;
     }
 
     .password-output {
-      background: #f3f4f6;
-      border: 2px solid #e5e7eb;
+      background: #111;
+      border: 2px solid #0f0;
       padding: 15px;
-      font-family: monospace;
-      font-size: 1.05em;
-      border-radius: 10px;
-      margin-top: 20px;
-      position: relative;
-      min-height: 48px;
+      font-size: 1.3em;
+      border-radius: 4px;
+      margin-top: 25px;
+      min-height: 54px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      word-break: break-word;
+      word-break: break-all;
+      color: #9f9;
     }
 
     .copy-btn {
-      background: #4f46e5;
-      color: #fff;
-      border: none;
+      background: #000;
+      color: #0f0;
+      border: 1px solid #0f0;
       padding: 8px 10px;
-      border-radius: 6px;
-      font-size: 0.85em;
+      border-radius: 4px;
+      font-size: 1em;
       cursor: pointer;
-      transition: background 0.3s;
+      transition: background 0.3s, color 0.3s;
+      font-family: 'VT323', monospace;
+    }
+    .copy-btn:hover {
+      background: #0f0;
+      color: #000;
+      text-shadow: none;
     }
 
-    .copy-btn:hover {
-      background: #4338ca;
+    .placeholder-text {
+      color: #555;
     }
 
     .strength-meter {
-      height: 8px;
-      background: #e5e7eb;
-      border-radius: 4px;
+      height: 10px;
+      background: #222;
+      border: 1px solid #0f0;
+      border-radius: 2px;
       margin-top: 15px;
       overflow: hidden;
     }
 
     .strength-fill {
       height: 100%;
-      transition: width 0.3s ease;
-      border-radius: 4px;
+      transition: width 0.4s ease, background-color 0.4s ease;
     }
 
     .strength-text {
-      font-size: 0.9em;
+      font-size: 1.1em;
       margin-top: 8px;
-      font-weight: 600;
-    }
-
-    .placeholder-text {
-      color: #888;
-      font-style: italic;
     }
   </style>
 </head>
 <body>
+  <canvas id="matrixCanvas"></canvas>
   <div class="container">
-    <h1>🔐 Password Generator</h1>
+    <h1>// ACCESS_KEY GENERATOR</h1>
 
     <div class="form-group">
-      <label for="length">Password Length:
+      <label for="length">Key Length:
         <span class="length-display" id="lengthDisplay">12</span>
       </label>
       <input type="range" id="length" min="4" max="50" value="12" />
@@ -181,11 +246,11 @@
       <div class="checkbox-item"><input type="checkbox" id="symbols" checked /><label for="symbols">Symbols</label></div>
     </div>
 
-    <button class="generate-btn" onclick="generatePassword()">Generate Password</button>
+    <button class="generate-btn" onclick="generatePassword()">// GENERATE</button>
 
     <div class="password-output" id="passwordOutput">
-      <span class="placeholder-text">Click "Generate" to create a password</span>
-      <button class="copy-btn" id="copyBtn" onclick="copyPassword()" style="display:none;">Copy</button>
+      <span class="placeholder-text">SYSTEM STANDBY...</span>
+      <button class="copy-btn" id="copyBtn" onclick="copyPassword()" style="display:none;">COPY</button>
     </div>
 
     <div class="strength-meter"><div class="strength-fill" id="strengthFill"></div></div>
@@ -194,6 +259,7 @@
 
   <script>
     let currentPassword = '';
+    let typingInterval;
 
     document.getElementById('length').addEventListener('input', function () {
       document.getElementById('lengthDisplay').textContent = this.value;
@@ -207,7 +273,7 @@
       const symbs = document.getElementById('symbols').checked;
 
       if (!upper && !lower && !nums && !symbs) {
-        alert('Select at least one character type.');
+        alert('>> ERROR: Character set required. Select at least one option. <<');
         return;
       }
 
@@ -248,17 +314,34 @@
     function displayPassword(pass) {
       const output = document.getElementById('passwordOutput');
       const copyBtn = document.getElementById('copyBtn');
-      output.innerHTML = `<span>${pass}</span>`;
+      
+      clearInterval(typingInterval);
+      output.innerHTML = '';
+      
+      const passwordSpan = document.createElement('span');
+      output.appendChild(passwordSpan);
       output.appendChild(copyBtn);
-      copyBtn.style.display = 'inline-block';
+      copyBtn.style.display = 'none';
+
+      let i = 0;
+      passwordSpan.textContent = '';
+      typingInterval = setInterval(() => {
+        if (i < pass.length) {
+          passwordSpan.textContent += pass.charAt(i);
+          i++;
+        } else {
+          clearInterval(typingInterval);
+          copyBtn.style.display = 'inline-block';
+        }
+      }, 50);
     }
 
     function copyPassword() {
       if (!currentPassword) return;
       navigator.clipboard.writeText(currentPassword).then(() => {
         const btn = document.getElementById('copyBtn');
-        btn.textContent = 'Copied!';
-        setTimeout(() => btn.textContent = 'Copy', 2000);
+        btn.textContent = 'COPIED!';
+        setTimeout(() => btn.textContent = 'COPY', 2000);
       });
     }
 
@@ -274,17 +357,68 @@
       if (/[0-9]/.test(pass)) score++;
       if (/[^A-Za-z0-9]/.test(pass)) score++;
 
-      let width = '25%', color = '#dc3545', label = 'Weak';
-      if (score >= 4) { width = '50%'; color = '#ffc107'; label = 'Fair'; }
-      if (score >= 5) { width = '75%'; color = '#28a745'; label = 'Good'; }
-      if (score >= 6) { width = '100%'; color = '#20c997'; label = 'Excellent'; }
+      let width = '25%', color = '#ff3333', label = '>> DANGER <<';
+      if (score >= 4) { width = '50%'; color = '#ffff33'; label = '>> RISKY <<'; }
+      if (score >= 5) { width = '75%'; color = '#33ff33'; label = '>> SECURE <<'; }
+      if (score >= 6) { width = '100%'; color = '#0f0'; label = '>> FORTIFIED <<'; }
 
       fill.style.width = width;
-      fill.style.background = color;
-      text.textContent = `Strength: ${label}`;
+      fill.style.backgroundColor = color;
+      fill.style.boxShadow = `0 0 8px ${color}`;
+      text.textContent = `SYSTEM.STRENGTH: ${label}`;
       text.style.color = color;
+      text.style.textShadow = `0 0 5px ${color}`;
     }
 
+    // --- MATRIX BACKGROUND SCRIPT ---
+    const canvas = document.getElementById('matrixCanvas');
+    const ctx = canvas.getContext('2d');
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const characters = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッン0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const charArray = characters.split('');
+
+    const fontSize = 16;
+    let columns = Math.floor(canvas.width / fontSize);
+    let drops = [];
+
+    function initializeDrops() {
+      drops = [];
+      for (let x = 0; x < columns; x++) {
+        drops[x] = 1;
+      }
+    }
+    initializeDrops();
+
+    function drawMatrix() {
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = '#0f0';
+      ctx.font = fontSize + 'px VT323';
+
+      for (let i = 0; i < drops.length; i++) {
+        const text = charArray[Math.floor(Math.random() * charArray.length)];
+        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+          drops[i] = 0;
+        }
+        drops[i]++;
+      }
+    }
+
+    setInterval(drawMatrix, 33);
+
+    window.addEventListener('resize', () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      columns = Math.floor(canvas.width / fontSize);
+      initializeDrops();
+    });
+    
     window.onload = generatePassword;
   </script>
 </body>
